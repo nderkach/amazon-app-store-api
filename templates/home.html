@@ -1,9 +1,80 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block js %}
+<script>
+    var loadingProgress = function() {
+        $('#search-logo').removeClass('glyphicon-search').addClass('glyphicon-refresh spinning');
+    }
 
+    var getMatch = function(value) {
+        var match = /amazon.com\/*.*\/dp\/([A-Z0-9]{10})/.exec(value);
+        if (!match) {
+            return false;
+        } else {
+            var appId = match[1];
+            return appId;
+        }
+    }
 
-{% block js %}
+    $('#search-logo').on('click', function(e) {
+        if ($('.input-group').hasClass('has-success')) {
+            loadingProgress();
+
+            $('#results').remove();
+
+            $.ajax({
+                url: "/" + $('.input-group').attr("app-id"),
+                success: function(item_data) {
+                    $.ajax({
+                        url: "/results",
+                        method: "POST",
+                        data: item_data,
+                        success: function(html) {
+                            $('.container').append(html);
+                        }
+                    });
+                },
+                error: function() {
+                    $('.container').append('<div id="results"> Nothing found :(</div>');
+                },
+                complete: function() {
+                    $('#search-logo').removeClass('glyphicon-refresh spinning').addClass('glyphicon-search');
+                }
+            });
+        }
+    })
+
+    $('#input-submit').on('input change paste keyup mouseup', function(e) {
+        var match = getMatch($(this).val());
+        if (match) {
+            $('.input-group').removeClass('has-error').addClass('has-success').attr("app-id", match);
+        } else {
+            $('.input-group').removeClass('has-success').addClass('has-error');
+        }
+    });
+
+    $('#input-submit').keypress(function(e) {
+        if (e.which == 13) {
+            $('#search-logo').click();
+            return false;
+        }
+    });
+</script>
+
 {% endblock %}
 
-
 {% block main %}
+<div class="container">
+    <div class="row">
+        <h2>Search Amazon App Store</h2>
+        <div id="custom-search-input">
+            <div class="input-group col-md-12">
+                <input type="text" id="input-submit" class="search-query form-control" placeholder="Example: https://www.amazon.com/gp/product/B01IQTOG2Y" />
+                <span class="input-group-btn">
+                    <button class="btn btn-danger" type="button" id="search-button">
+                        <span class="glyphicon glyphicon-search" id="search-logo"/>
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

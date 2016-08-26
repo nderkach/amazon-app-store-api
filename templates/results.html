@@ -1,0 +1,19 @@
+<div class="jumbotron" id="results">
+    <ul class="list-group">
+        <li class="list-group-item">{{ title }}</li>
+        <li class="list-group-item">Version: {{ version }}</li>
+        <li class="list-group-item">Release Date: {{ release_date }}</li>
+    </ul>
+    {% if release_notes %}
+    <div class="panel panel-default">
+        <div class="panel-heading">Release Notes</div>
+        <div class="panel-body">
+            <ul class="list-group">
+                {% for item in release_notes %}
+                <li class="list-group-item">{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
